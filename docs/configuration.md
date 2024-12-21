@@ -6,8 +6,9 @@ For the Asterisk build tool, the configuration language standard is set to [YAML
 
 Once you open up your Asterisk.yml file, you'll propably see something like this (If you set it up using `ast init`):
 ```YAML
-name: {yourProgramName}
-version: 0.1.0
+package:
+  name: {yourProgramName}
+  version: 0.1.0
 
 dependencies:
   # Add your dependencies here
