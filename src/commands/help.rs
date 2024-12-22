@@ -8,6 +8,7 @@ pub fn handle_help() {
     init       Initialize a new project in the current directory
     help       Prints this help information
     build      Build the project if initialized with Asterisk.yml
+    clean      Cleans the output folder
 
 Use \x1b[36m\x1b[1mast help\x1b[36m\x1b[0m <COMMAND> for more information about a command.");
 }

@@ -9,6 +9,7 @@ fn main() {
         Some("init") => commands::init::handle_init(),
         Some("help") | None => commands::help::handle_help(),
         Some("build") => commands::build::handle_build(),
+        Some("clean") => commands::clean::clean_output(),
         Some(cmd) => eprintln!("[\x1b[31m\x1b[1mError\x1b[0m] Unknown Command: {}", cmd),
     }
 }

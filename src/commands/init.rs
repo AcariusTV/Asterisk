@@ -5,52 +5,54 @@ use std::path::Path;
 pub fn handle_init() {
     let wd = match std::env::current_dir() {
         Ok(dir) => dir,
-        Err(e) => return eprintln!("[\x1b[31m\x1b[1mError\x1b[0m] Could not get current directory: {}", e),
+        Err(e) => {
+            eprintln!("[\x1b[31m\x1b[1mError\x1b[0m] Could not get current directory: {}", e);
+            return;
+        }
     };
 
     let project_name = wd.file_name()
         .and_then(|name| name.to_str())
         .unwrap_or("unnamed_project");
 
-    match [
+    let tasks = [
         create_asterisk_yml(&wd, project_name),
         setup_src_directory(&wd),
         create_gitignore(&wd),
-    ].into_iter().find(|result| result.is_err()) {
-        Some(Err(e)) => eprintln!("[\x1b[31m\x1b[1mError\x1b[0m] {}", e),
-        Some(Ok(_)) => {},
-        None => println!("[\x1b[32m\x1b[1mSuccess\x1b[0m] Successfully initialized project '{}'.", project_name),
+    ];
+
+    if let Some(Err(e)) = tasks.iter().find(|result| result.is_err()) {
+        eprintln!("[\x1b[31m\x1b[1mError\x1b[0m] {}", e);
+    } else {
+        println!("[\x1b[32m\x1b[1mSuccess\x1b[0m] Successfully initialized project '{}'.", project_name);
     }
 }
 
 fn create_asterisk_yml(wd: &Path, project_name: &str) -> Result<(), String> {
-    let file_path = wd.join("Asterisk.yml");
     let content = format!(
-        "name: {}\nversion: 0.1.0\n\ndependencies:\n  # Add your dependencies here\n",
+        "package:\n  name: {}\n  version: 0.1.0\n\ndependencies:\n  # Add your dependencies here\n",
         project_name
     );
-    write_to_file(&file_path, &content, "Asterisk.yml")
+    write_to_file(&wd.join("Asterisk.yml"), &content)
 }
 
 fn setup_src_directory(wd: &Path) -> Result<(), String> {
     let src_dir = wd.join("src");
     create_dir(&src_dir).map_err(|e| format!("Failed to create `src` directory: {}", e))?;
 
-    let main_rs_path = src_dir.join("main.rs");
     let content = "fn main() {\n    println!(\"Hello, world!\");\n}\n";
-    write_to_file(&main_rs_path, &content, "main.rs")
+    write_to_file(&src_dir.join("main.rs"), &content)
 }
 
 fn create_gitignore(wd: &Path) -> Result<(), String> {
-    let gitignore_path = wd.join(".gitignore");
     let content = "/output\n";
-    write_to_file(&gitignore_path, &content, ".gitignore")
+    write_to_file(&wd.join(".gitignore"), &content)
 }
 
-fn write_to_file(path: &Path, content: &str, description: &str) -> Result<(), String> {
+fn write_to_file(path: &Path, content: &str) -> Result<(), String> {
     File::create(path)
         .and_then(|mut file| file.write_all(content.as_bytes()))
-        .map_err(|e| format!("Failed to create `{}`: {}", description, e))
+        .map_err(|e| format!("Failed to create `{}`: {}", path.display(), e))
 }
 
 fn is_file_modified(_path: &Path) -> bool {
